@@ -1,0 +1,47 @@
+
+<head>
+<script>
+function UserAction() {
+    var xhttp = new XMLHttpRequest();
+    var request = "http://api.openweathermap.org/data/2.5/forecast?q=Wollongong,au&appid=cfbca24d7a2ff332e6f444149b8bbee3"
+  
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+      processResult(xhttp);
+    }
+  };
+
+  xhttp.open("GET", request);
+  xhttp.send();
+
+}
+
+function processResult(xhttp){
+  var jsonText = xhttp.responseText;
+  
+  var postsObj = JSON.parse(jsonText);
+
+  
+
+  display(postsObj); 
+}
+
+function display(postObj)
+{
+	console.log(postObj.cnt);
+}
+
+
+
+
+
+		
+
+
+</script>
+
+<body>
+<button type="submit" onclick="UserAction()">Search</button>
+</body>
+</head>
+</html>
