@@ -1,4 +1,5 @@
 
+<html>
 <head>
 <script>
 function UserAction() {
@@ -29,6 +30,12 @@ function processResult(xhttp){
 function display(postObj)
 {
 	console.log(postObj.cnt);
+
+	for(var i = 0; i < postObj.list.length; i++)
+	{
+		var temp = postObj.list[i].main.temp;
+		console.log(temp);
+	}
 }
 
 
