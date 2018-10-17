@@ -22,19 +22,31 @@ function processResult(xhttp){
   
   var postsObj = JSON.parse(jsonText);
 
-  
-
+  var date = Date.now();
+  console.log(date);
   display(postsObj); 
 }
 
 function display(postObj)
 {
-	console.log(postObj.cnt);
+	console.log(postObj);
 
 	for(var i = 0; i < postObj.list.length; i++)
 	{
-		var temp = postObj.list[i].main.temp;
-		console.log(temp);
+
+    // Retrieves date from each object
+    var fulldatetime = postObj.list[i].dt_txt;
+    var fulldate = new Date(fulldatetime);
+    
+    //Takes the time, day and month from date object
+    var hour = fulldate.getHours();
+    var day = fulldate.getDate();
+    var month = fulldate.getMonth() + 1;
+		
+    //Retrieves the temperature and converts it from Kelvin to celsius to 2 DP
+    var temp = postObj.list[i].main.temp - 273.15;
+    temp = Math.round(temp * 100) / 100;
+		console.log(hour);
 	}
 }
 
@@ -52,3 +64,4 @@ function display(postObj)
 </body>
 </head>
 </html>
+
