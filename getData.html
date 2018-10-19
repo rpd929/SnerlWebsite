@@ -1,4 +1,5 @@
 
+
 <html>
 <head>
 <script>
@@ -27,6 +28,14 @@ function processResult(xhttp){
   display(postsObj); 
 }
 
+function isEmpty(obj) {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+}
+
 function display(postObj)
 {
 	console.log(postObj);
@@ -46,7 +55,16 @@ function display(postObj)
     //Retrieves the temperature and converts it from Kelvin to celsius to 2 DP
     var temp = postObj.list[i].main.temp - 273.15;
     temp = Math.round(temp * 100) / 100;
-		console.log(hour);
+    myObj = postObj.list[i].rain;
+    
+    // Checks to see if there is any rain being recorded for the 3 hour period. If is empty, no rain, else, there is some rain expected
+    if(isEmpty(myObj))
+    {
+      console.log("is empty");
+    } else {
+      console.log("isnt empty");
+    }
+    
 	}
 }
 
@@ -64,4 +82,3 @@ function display(postObj)
 </body>
 </head>
 </html>
-
