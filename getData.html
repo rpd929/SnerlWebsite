@@ -12,22 +12,17 @@ function UserAction() {
       processResult(xhttp);
     }
   };
-
   xhttp.open("GET", request);
   xhttp.send();
-
 }
-
 function processResult(xhttp){
   var jsonText = xhttp.responseText;
   
   var postsObj = JSON.parse(jsonText);
-
   var date = Date.now();
   console.log(date);
   display(postsObj); 
 }
-
 function isEmpty(obj) {
     for(var key in obj) {
         if(obj.hasOwnProperty(key))
@@ -35,14 +30,11 @@ function isEmpty(obj) {
     }
     return true;
 }
-
 function display(postObj)
 {
 	console.log(postObj);
-
 	for(var i = 0; i < postObj.list.length; i++)
 	{
-
     // Retrieves date from each object
     var fulldatetime = postObj.list[i].dt_txt;
     var fulldate = new Date(fulldatetime);
@@ -56,25 +48,36 @@ function display(postObj)
     var temp = postObj.list[i].main.temp - 273.15;
     temp = Math.round(temp * 100) / 100;
     myObj = postObj.list[i].rain;
+   
     
     // Checks to see if there is any rain being recorded for the 3 hour period. If is empty, no rain, else, there is some rain expected
-    if(isEmpty(myObj))
-    {
-      console.log("is empty");
-    } else {
-      console.log("isnt empty");
+    if(i == 0 || 10)  
+     {
+      if(isEmpty(Object.values(myObj)))
+      {
+          if(i == 0)
+          {
+            console.log("No This morning");
+          } else if(i == 10)
+          {
+            console.log("No rain tomorrow morning");
+          }
+
+      } else {
+        if(i == 0)
+        {
+          console.log("Rain expected this morning: " + Object.values(myObj)[0] + "mm");
+        } else if (i == 10)
+        {
+          console.log("Rain expected tomorrow: " + Object.values(myObj)[0] + "mm");
+        }
+      
+      }
     }
     
 	}
 }
-
-
-
-
-
 		
-
-
 </script>
 
 <body>
