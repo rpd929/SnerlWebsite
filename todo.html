@@ -21,7 +21,7 @@ function initApp(){
     db.transaction(
       function (transaction) {
         transaction.executeSql(
-          'CREATE TABLE IF NOT EXISTS TO_DO(TASK TEXT NOT NULL, URGENCY TEXT NOT NULL);', 
+          'CREATE TABLE IF NOT EXISTS ALLFIXTURES(HOMETEAM TEXT NOT NULL, AWAYTEAM TEXT NOT NULL, GAMEDATETIME TEXT NOT NUL);', 
           null, 
           null,
           errorHandler
@@ -44,6 +44,9 @@ function addTask(){
   var urgencySelect = document.getElementById("urgency");
   var urgency = urgencySelect.value;
 
+  var urgencySelect = document.getElementById("urgency2");
+  var urgency = urgencySelect.value;
+
   dbInsertTask(task, urgency);
 }
 
@@ -53,8 +56,8 @@ function dbInsertTask(task, urgency){
     db.transaction(
       function (transaction) {
         transaction.executeSql(
-          'INSERT INTO TO_DO (TASK, URGENCY) VALUES (?, ?);', 
-          [task, urgency], 
+          'INSERT INTO ALLFIXTURES (HOMETEAM, AWAYTEAM, GAMEDATETIME) VALUES (?, ?, ?);', 
+          [task, urgency, urgency2], 
           null,
           errorHandler
         );
@@ -62,6 +65,20 @@ function dbInsertTask(task, urgency){
     );
   }
 }
+
+function deleteAll() {
+  if(db != null){
+      db.transaction(
+        function (transaction) {
+          transaction.executeSql(
+            'DELETE FROM ALLFIXTURES WHERE ROWID > 0;', 
+            null,
+            errorHandler
+          );
+        }
+      );
+    }
+  }
 
 function showTask(){
 
@@ -111,6 +128,10 @@ Urgency:
 
 <button onClick="addTask()">
 Add
+</button>
+
+<button onClick="deleteAll()">
+Delete
 </button>
 
 <button onClick="showTask()">

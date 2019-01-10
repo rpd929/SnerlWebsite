@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Snerl Website</title>
+	<script>
+		function UserAction() {
+		    var xhttp = new XMLHttpRequest();
+		    var request = "http://api.openweathermap.org/data/2.5/forecast?q=Wollongong,au&appid=cfbca24d7a2ff332e6f444149b8bbee3"
+		  
+		  xhttp.onreadystatechange = function() {
+		    if (xhttp.readyState == 4 && xhttp.status == 200) {
+		      processResult(xhttp);
+		    }
+		  };
+		  xhttp.open("GET", request);
+		  xhttp.send();
+		}
+		function processResult(xhttp){
+		  var jsonText = xhttp.responseText;
+		  
+		  var postsObj = JSON.parse(jsonText);
+		  var date = Date.now();
+		  display(postsObj); 
+		}
+		function isEmpty(obj) {
+		    for(var key in obj) {
+		        if(obj.hasOwnProperty(key))
+		            return false;
+		    }
+		    return true;
+		}
+		function display(postObj)
+		{
+			console.log(postObj);
+			for(var i = 0; i < postObj.list.length; i++)
+			{
+		    // Retrieves date from each object
+		    var fulldatetime = postObj.list[i].dt_txt;
+		    var fulldate = new Date(fulldatetime);
+		    
+		    //Takes the time, day and month from date object
+		    var hour = fulldate.getHours();
+		    var day = fulldate.getDate();
+		    var month = fulldate.getMonth() + 1;
+				
+		    //Retrieves the temperature and converts it from Kelvin to celsius to 2 DP
+		    var temp = postObj.list[i].main.temp - 273.15;
+		    temp = Math.round(temp * 100) / 100;
+		    myObj = postObj.list[i].rain;
+		   
+		    
+		    // Checks to see if there is any rain being recorded for the 3 hour period. If is empty, no rain, else, there is some rain expected
+		    if(i == 0 || 10)  
+		     {
+		      if(isEmpty(Object.values(myObj)))
+		      {
+		          if(i == 0)
+		          {
+		          	var rainToday = document.getElementById('forcast');
+
+		          	rainToday.innerHTML = " <h4> No Rain expected this morning </h4>";
+
+		           
+		          } else if(i == 10)
+		          {
+		           var rainToday =+ document.getElementById('forcast');
+
+		          	rainToday.innerHTML = " <h4> No Rain expected tomorrow morning </h4>";
+		          }
+
+		      } else {
+		        if(i == 0)
+		        {
+		        	var rainToday = document.getElementById('forcast');
+
+		          	rainToday.innerHTML = " <h4>Rain expected this morning: " + Object.values(myObj)[0] + "mm </h4>";
+
+		          
+		        } else if (i == 10)
+		        {
+		          var rainToday = document.getElementById('forcast');
+
+		          	rainToday.innerHTML += " <h4>Rain expected tomorrow morning: " + Object.values(myObj)[0] + "mm </h4>";
+		        }
+		      
+		      }
+		    }
+		    
+			}
+		}
+		
+</script>
+
+<script>
+
+// Web SQL database
+var db = null;
+
+function initApp(){
+  console.log("initialise app");
+
+  try{
+    db = openDatabase('taskdb', '1.0', 'Task DB', 2 * 1024 * 1024);
+  }catch(ignore){
+    console.error("local DB is not supported");
+  }
+
+  if(db != null){
+
+    db.transaction(
+      function (transaction) {
+        transaction.executeSql(
+          'CREATE TABLE IF NOT EXISTS ALLFIXTURES(HOMETEAM TEXT NOT NULL, AWAYTEAM TEXT NOT NULL, GAMEDATETIME TEXT NOT NULL);', 
+          null, 
+          null,
+          errorHandler
+        );
+      }
+    );
+
+  }
+}
+
+// a generic error handler for db
+function errorHandler(transaction, error){
+  console.error("Error: " + error.code + ": " + error.message);
+}
+
+function addTask(){
+  var taskInput = document.getElementById("homeTeam");
+  var task = taskInput.value;
+
+  var urgencySelect = document.getElementById("awayTeam");
+  var urgency = urgencySelect.value;
+
+  var fullDateTime;
+
+  var date = document.getElementById('gameDay').value + "/" + document.getElementById('gameMonth').value + "/" + document.getElementById('gameYear').value;
+
+  var time = document.getElementById('gameTime').value + " " + document.getElementById('am/pm').value;
+  var urgency2 = time + ' on ' + date;
+
+
+  
+
+  dbInsertTask(task, urgency, urgency2);
+}
+
+function dbInsertTask(task, urgency, urgency2){
+  //save task to database
+  if(db != null){
+    db.transaction(
+      function (transaction) {
+        transaction.executeSql(
+          'INSERT INTO ALLFIXTURES (HOMETEAM, AWAYTEAM, GAMEDATETIME) VALUES (?, ?, ?);', 
+          [task, urgency, urgency2], 
+          null,
+          errorHandler
+        );
+      }
+    );
+  }
+}
+
+function deleteAll() {
+  if(db != null){
+      db.transaction(
+        function (transaction) {
+          transaction.executeSql(
+            'DELETE FROM ALLFIXTURES WHERE ROWID > 0;', 
+            null,
+            errorHandler
+          );
+        }
+      );
+    }
+  }
+
+function showTask(){
+
+  if(db != null){
+    db.transaction(
+      function (transaction) {
+        transaction.executeSql(
+          'select * from ALLFIXTURES;', 
+          null, 
+          displayTasks,
+          errorHandler
+        );
+      }
+    );
+  }
+
+}
+
+function displayTasks(transaction, results){
+  var taskList = results.rows;
+  var display = document.getElementById('allGames');
+  display.innerHTML = '';
+  for(var x = 0; x < taskList.length; x++)
+  {
+    
+    display.innerHTML += '<li> ' + taskList[x].HOMETEAM + " vs " + taskList[x].AWAYTEAM + " at " + taskList[x].GAMEDATETIME  + '</li>';
+    
+  }
+}
+</script>
+</head>
+<body onload="initApp(), showTask(), UserAction()">
+	<table border="1">
+		<tr>
+			<td colspan="2" align="center">
+				
+					<h1> Weather </h1>
+					<div id="forcast">
+					<h4 id = "rainToday"> </h4>
+					<h4 id="weatherToday"> </h4> 
+					<h4 id="weatherTomorrow"></h4>
+
+				</div>
+			</td>
+		</tr>
+
+		<tr>
+			<td valign="top" align="center">
+				<h1> Football Fixtures</h1>
+				<ul id="allGames">
+					<li id="game1"> </li>
+					<li id="game2"> </li>
+					<li id="game3"> </li>
+					<li id="game4"> </li>
+				</ul>
+			</td>
+
+			<td>
+				<h1> To-Do Everyday</h1>
+				<ul id="allTasks">
+					<li id="task1"> Make Bed & Tidy Room </li>
+					<li id="task2"> Washing Up  </li>
+					<li id="task3"> Tidy Lounge Area </li>
+					<li id="task4"> Organise Dinner </li>
+					<li id="task5"> Rinse glassware</li>
+					<li id="task6"> Clean Coffee Machine</li>
+				</ul>
+			</td>
+		</tr>
+
+		<tr>
+			<td colspan="2">
+				<div>
+					<h1 align="center"> Add a Fixture </h1>
+
+					<select id="homeTeam">
+						<option value="tot">Tottenham</option>
+						<option value="ars">Arsenal</option>
+					</select>
+
+					VS
+
+					<select id="awayTeam">
+						<option value="tot">Tottenham</option>
+						<option value="ars">Arsenal</option>
+					</select>
+
+					ON
+
+					<textarea style="width: 20px; height: 15px" id="gameDay"> </textarea> /
+					<textarea style="width: 20px; height: 15px" id="gameMonth"> </textarea> /
+					<textarea id="gameYear" style="width: 20px; height: 15px"></textarea>
+
+					AT 
+					<textarea id="gameTime" style="width: 20px; height: 15px"></textarea>
+
+
+					<select id="am/pm">
+						<option value="am">AM</option>
+						<option value="pm">PM</option>
+					</select>
+					<br />
+					<button onclick="addTask()">Add</button>
+					
+					<button onclick="deleteAll()">Delete</button>
+
+
+
+
+
+
+
+
+					
+
+				</div>
+			</td>
+		</tr>
+	</table>
+
+</body>
+</html>
